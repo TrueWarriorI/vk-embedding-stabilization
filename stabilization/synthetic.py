@@ -40,8 +40,7 @@ def plane_rotation(dim: int, degrees: float, dtype, device) -> torch.Tensor:
     return rotation
 
 
-def _rows(total, config, rank, size, stream, dtype, device):
-    start, stop = row_bounds(total, rank, size)
+def _rows(start, stop, config, stream, dtype, device):
     generator = np.random.PCG64(np.random.SeedSequence([config.seed, stream]))
     # A float64 uniform sample consumes one generator step.
     generator.advance(start * config.dim)
@@ -49,6 +48,33 @@ def _rows(total, config, rank, size, stream, dtype, device):
     values *= 2.0 * math.sqrt(3.0)
     values -= math.sqrt(3.0)
     return torch.from_numpy(values).to(dtype=dtype, device=device)
+
+
+def embedding_rows(
+    config: SyntheticConfig,
+    entity: str,
+    start: int,
+    stop: int,
+    *,
+    version: int,
+    dtype: torch.dtype = torch.float64,
+    device: str | torch.device = "cpu",
+    rotation: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Generate one contiguous block without materializing other rows."""
+    if version not in (0, 1):
+        raise ValueError("Synthetic data supports versions 0 and 1.")
+    if entity not in ("users", "items") or not 0 <= start <= stop <= getattr(config, entity):
+        raise ValueError("Invalid synthetic entity or row range.")
+    stream = int(entity == "items")
+    rows = _rows(start, stop, config, stream, dtype, device)
+    if version == 1:
+        if rotation is None:
+            rotation = plane_rotation(config.dim, config.angle, dtype, device)
+        rows = rows @ rotation
+        if config.noise:
+            rows += config.noise * _rows(start, stop, config, stream + 2, dtype, device)
+    return rows
 
 
 def make_embeddings(
@@ -61,17 +87,8 @@ def make_embeddings(
     size: int = 1,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Return (users, items). Row indices are IDs shared by both versions."""
-    if version not in (0, 1):
-        raise ValueError("Synthetic data supports versions 0 and 1.")
-    users = _rows(config.users, config, rank, size, 0, dtype, device)
-    items = _rows(config.items, config, rank, size, 1, dtype, device)
-    if version == 0:
-        return users, items
-
-    rotation = plane_rotation(config.dim, config.angle, dtype, device)
-    users = users @ rotation
-    items = items @ rotation
-    if config.noise:
-        users += config.noise * _rows(config.users, config, rank, size, 2, dtype, device)
-        items += config.noise * _rows(config.items, config, rank, size, 3, dtype, device)
+    rotation = plane_rotation(config.dim, config.angle, dtype, device) if version == 1 else None
+    kwargs = {"version": version, "dtype": dtype, "device": device, "rotation": rotation}
+    users = embedding_rows(config, "users", *row_bounds(config.users, rank, size), **kwargs)
+    items = embedding_rows(config, "items", *row_bounds(config.items, rank, size), **kwargs)
     return users, items

@@ -1,0 +1,82 @@
+{
+  "synthetic": {
+    "users": 4096,
+    "items": 3072,
+    "dim": 32,
+    "seed": 42,
+    "angle": 75,
+    "noise": 0.0
+  },
+  "coordinate_scale": 3,
+  "anchor_items": 1536,
+  "held_out_items": 1536,
+  "device": "cpu",
+  "dtype": "float64",
+  "original_score_error": {
+    "pairs": 1024,
+    "relative_l2": 2.0630188414952928e-16,
+    "max_abs": 3.552713678800501e-15
+  },
+  "variants": {
+    "raw": {
+      "reference_basis": "raw",
+      "users_cosine": 0.21979658580388772,
+      "held_out_items_cosine": 0.22015120046115336,
+      "within_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 0.0,
+        "max_abs": 0.0
+      },
+      "mixed_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 1.5192322390316408,
+        "max_abs": 26.24528133667061
+      }
+    },
+    "procrustes": {
+      "reference_basis": "raw",
+      "users_cosine": 0.848464511628585,
+      "held_out_items_cosine": 0.8483304759544147,
+      "within_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 2.4889373721980263e-15,
+        "max_abs": 5.1514348342607263e-14
+      },
+      "mixed_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 0.8290482304585048,
+        "max_abs": 16.085754294752228
+      }
+    },
+    "svd": {
+      "reference_basis": "svd",
+      "users_cosine": -0.04968113385594777,
+      "held_out_items_cosine": -0.07089506977930854,
+      "within_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 1.197840554970996e-15,
+        "max_abs": 2.842170943040401e-14
+      },
+      "mixed_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 1.4234414689084698,
+        "max_abs": 30.830779203414515
+      }
+    },
+    "full": {
+      "reference_basis": "svd",
+      "users_cosine": 1.0,
+      "held_out_items_cosine": 1.0,
+      "within_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 2.3889145770399773e-15,
+        "max_abs": 5.1514348342607263e-14
+      },
+      "mixed_version_score_error": {
+        "pairs": 1024,
+        "relative_l2": 1.8425240431911584e-15,
+        "max_abs": 3.730349362740526e-14
+      }
+    }
+  }
+}

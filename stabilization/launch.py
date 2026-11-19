@@ -8,7 +8,7 @@ import sys
 from .runtime import validate_world_size
 
 
-def torchrun_command(processes: int) -> tuple[list[str], dict]:
+def torchrun_command(processes: int, module: str = "stabilization") -> tuple[list[str], dict]:
     validate_world_size(processes)
     command = [
         sys.executable,
@@ -26,17 +26,18 @@ def torchrun_command(processes: int) -> tuple[list[str], dict]:
         command += ["--rdzv-backend=c10d", "--rdzv-conf=store_type=file", "--local-addr=127.0.0.1"]
     else:
         command.append("--standalone")
-    command += ["--module", "stabilization"]
+    command += ["--module", module]
     return command, env
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--processes", type=int, required=True)
+    parser.add_argument("--module", default="stabilization", help="Python module to launch")
     parser.add_argument("experiment", nargs=argparse.REMAINDER, help="mode and experiment options")
     args = parser.parse_args()
     try:
-        command, env = torchrun_command(args.processes)
+        command, env = torchrun_command(args.processes, args.module)
     except ValueError as error:
         parser.error(str(error))
     return subprocess.run(command + args.experiment, env=env, check=False).returncode

@@ -1,0 +1,15 @@
+{
+  "mode": "align",
+  "users": 8192,
+  "items": 6144,
+  "dim": 32,
+  "dtype": "float64",
+  "block_rows": 127,
+  "processes": 4,
+  "effective_rank": 32,
+  "anchor_items": 6144,
+  "sampled_pairs": 2048,
+  "relative_score_error": 2.0797213963430656e-15,
+  "users_cosine": 1.0,
+  "items_cosine": 1.0
+}

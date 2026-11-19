@@ -1,16 +1,14 @@
 """Run the reference, alignment or combined synthetic experiment."""
 
 import argparse
-from contextlib import contextmanager
 from dataclasses import asdict
-import json
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from time import perf_counter
 
 import torch
 import torch.distributed as dist
 
+from .artifacts import artifact_writer, write_report
 from .method import align, fit_svd
 from .metrics import mean_cosine, score_error
 from .runtime import rank_and_size, runtime, synchronize
@@ -51,20 +49,6 @@ def timed(device, operation, *args):
     if dist.is_initialized():
         dist.all_reduce(elapsed, op=dist.ReduceOp.MAX)
     return result, elapsed.item()
-
-
-@contextmanager
-def artifact_writer(path: Path):
-    """Replace the destination only after the complete artifact has been written."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = NamedTemporaryFile(dir=path.parent, delete=False)
-    temp_path = Path(temp.name)
-    try:
-        with temp:
-            yield temp
-        temp_path.replace(path)
-    finally:
-        temp_path.unlink(missing_ok=True)
 
 
 def experiment_config(args):
@@ -161,11 +145,7 @@ def main(argv=None) -> None:
     with runtime(args.device, args.threads) as device:
         report = run(args, device)
         if rank_and_size()[0] == 0:
-            output = json.dumps(report, indent=2, allow_nan=False)
-            if args.output:
-                with artifact_writer(args.output) as artifact:
-                    artifact.write((output + "\n").encode("utf-8"))
-            print(output, flush=True)
+            write_report(report, args.output)
 
 
 if __name__ == "__main__":

@@ -48,6 +48,32 @@ python -m unittest discover -s tests -v
 
 Эталон для синтетического сценария содержит преобразования, размерности и seed. По ним каждый процесс восстанавливает свой блок версии 0. Число процессов при создании эталона и выравнивании может различаться. Параметр `--noise` добавляет независимое возмущение второй версии. Параметр `--output` сохраняет JSON с метриками, параметрами и временем отдельных шагов. Все параметры доступны через `python -m stabilization --help`.
 
+## Дополнительные эксперименты
+
+Все сценарии используют синтетические эмбеддинги. В [дополнительном ноутбуке](notebooks/experiments.ipynb) есть сравнение методов, график бенчмарка и результаты обработки файлов.
+
+```powershell
+python -m stabilization.ablation --output runs/ablation.json
+python -m stabilization.benchmark --sizes 4096 65536 262144 --output runs/qr-benchmark.json
+python -m jupyterlab notebooks/experiments.ipynb
+```
+
+В первом эксперименте координаты объектов масштабируются, а координаты пользователей меняются обратно. Затем обе матрицы поворачиваются. Сравниваются исходные эмбеддинги, только Прокруст, только SVD и полный метод. Половина объектов выделена для оценки. Бенчмарк сравнивает QR и TSQR с одинаковым общим числом потоков CPU. Подробности и результаты приведены в [отчёте](REPORT.md#дополнительные-эксперименты).
+
+### Обработка файлов блоками
+
+Для проверки в ноутбуке установите `check_local_run = True`. Ячейка сама создаст недостающие синтетические файлы и результаты в `runs/`. При повторном запуске она использует готовые файлы. Те же шаги можно выполнить вручную.
+
+```powershell
+python -m stabilization.streaming generate --users 8192 --items 6144 --dim 32 --block-rows 127 --output runs/stream-input
+python -m stabilization.launch --processes 2 --module stabilization.streaming reference --input runs/stream-input/version0 --block-rows 127 --output runs/stream-reference
+python -m stabilization.launch --processes 4 --module stabilization.streaming align --input runs/stream-input/version1 --reference runs/stream-input/version0 --checkpoint runs/stream-reference/transforms.pt --block-rows 127 --output runs/stream-aligned
+```
+
+Для каждого входа нужны матрицы `users.npy` и `items.npy` общего типа `float32` или `float64`, а также `user_ids.npy` и `item_ids.npy` со строго возрастающими ID типа `int64`. Векторы хранятся в порядке ID. Выравнивание опирается на общие ID объектов и применяет результат ко всем строкам текущей версии, включая новые ID.
+
+Выходная папка содержит стабилизированные матрицы, ID, `transforms.pt` и `metrics.json`. Для повторного запуска укажите новую выходную папку. Для распределённого файлового режима процессы используют общий каталог. Режим проверен на CPU в Windows. Параметр `--block-rows` ограничивает число строк в одном рабочем блоке тензоров. Итоговое потребление памяти также зависит от файлового кэша и библиотек.
+
 ## Распределённый запуск
 
 - CPU использует Gloo. Для сбалансированного дерева TSQR число процессов должно быть степенью двойки.
@@ -63,9 +89,11 @@ python -m unittest discover -s tests -v
 | `stabilization/tsqr.py` | Локальное QR и бинарное дерево TSQR. |
 | `stabilization/method.py` | SVD-преобразования и выравнивание Прокруста. |
 | `stabilization/metrics.py` | Ошибка оценок и косинус между версиями. |
+| `stabilization/ablation.py`, `benchmark.py`, `streaming.py` | Сравнение методов, бенчмарк и обработка файлов блоками. |
 | `stabilization/runtime.py`, `launch.py`, `__main__.py` | Группа процессов, запуск через `torchrun` и CLI. |
 | `notebooks/demo.ipynb` | Разбор алгоритма, численная проверка и графики. |
-| `tests/test_method.py` | Локальные тесты, включая сравнение с прямым SVD. |
+| `notebooks/experiments.ipynb` | Дополнительные эксперименты и графики. |
+| `tests/` | Проверка основного алгоритма, сравнения методов и файлового режима. |
 | `results/`, [REPORT.md](REPORT.md) | Конфигурации, результаты и итоговый отчёт. |
 
 Для подключения своих данных передайте локальные блоки обеих матриц в `fit_svd`. Для вызова `align` подготовьте строки общих объектов в одинаковом порядке и разместите соответствующие ID на одном процессе. После расчёта вызовите `transforms.apply(users, items)` для каждого блока. Модули принимают тензоры PyTorch. CLI работает с синтетическими данными.
