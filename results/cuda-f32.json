@@ -1,0 +1,57 @@
+{
+  "mode": "demo",
+  "synthetic": {
+    "users": 6144,
+    "items": 4096,
+    "dim": 48,
+    "seed": 42,
+    "angle": 75.0,
+    "noise": 0.1
+  },
+  "dtype": "float32",
+  "device": "cuda",
+  "processes": 1,
+  "threads_per_process": 1,
+  "rtol": 5.7220458984375e-06,
+  "torch_version": "2.13.0+cu126",
+  "backend": null,
+  "reference": {
+    "effective_rank": 48,
+    "fit_seconds": 0.22779910000008385,
+    "apply_seconds": 0.0010719000001699897,
+    "scores": {
+      "pairs": 1024,
+      "relative_l2": 7.797245241352219e-07,
+      "max_abs": 1.9073486328125e-05
+    }
+  },
+  "iteration": {
+    "effective_rank": 48,
+    "fit_seconds": 0.003385300000445568,
+    "align_seconds": 0.004676200000176323,
+    "apply_seconds": 0.0001036000003296067,
+    "scores": {
+      "pairs": 1024,
+      "relative_l2": 8.7613442809213e-06,
+      "max_abs": 0.0002288818359375
+    },
+    "cosine": {
+      "users_before": {
+        "mean": 0.25713898384270845,
+        "count": 6144
+      },
+      "users_after": {
+        "mean": 0.9950139965035617,
+        "count": 6144
+      },
+      "items_before": {
+        "mean": 0.2573198354320449,
+        "count": 4096
+      },
+      "items_after": {
+        "mean": 0.9950552707868902,
+        "count": 4096
+      }
+    }
+  }
+}

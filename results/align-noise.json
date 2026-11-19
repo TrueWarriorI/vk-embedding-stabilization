@@ -1,0 +1,47 @@
+{
+  "mode": "align",
+  "synthetic": {
+    "users": 4096,
+    "items": 3072,
+    "dim": 32,
+    "seed": 42,
+    "angle": 75.0,
+    "noise": 0.15
+  },
+  "dtype": "float64",
+  "device": "cpu",
+  "processes": 2,
+  "threads_per_process": 1,
+  "rtol": 7.105427357601002e-15,
+  "torch_version": "2.13.0+cu126",
+  "backend": "gloo",
+  "iteration": {
+    "effective_rank": 32,
+    "fit_seconds": 0.004781399999956193,
+    "align_seconds": 0.0013929999995525577,
+    "apply_seconds": 0.000511999999616819,
+    "scores": {
+      "pairs": 2048,
+      "relative_l2": 2.296115622911151e-15,
+      "max_abs": 6.039613253960852e-14
+    },
+    "cosine": {
+      "users_before": {
+        "mean": 0.2557390250222507,
+        "count": 4096
+      },
+      "users_after": {
+        "mean": 0.9889024525080053,
+        "count": 4096
+      },
+      "items_before": {
+        "mean": 0.2558085917134851,
+        "count": 3072
+      },
+      "items_after": {
+        "mean": 0.9889652608892945,
+        "count": 3072
+      }
+    }
+  }
+}

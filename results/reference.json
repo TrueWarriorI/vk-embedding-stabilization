@@ -1,0 +1,29 @@
+{
+  "mode": "reference",
+  "synthetic": {
+    "users": 4096,
+    "items": 3072,
+    "dim": 32,
+    "seed": 42,
+    "angle": 75.0,
+    "noise": 0.0
+  },
+  "dtype": "float64",
+  "device": "cpu",
+  "processes": 1,
+  "threads_per_process": 1,
+  "rtol": 7.105427357601002e-15,
+  "torch_version": "2.13.0+cu126",
+  "backend": null,
+  "reference": {
+    "effective_rank": 32,
+    "fit_seconds": 0.061344499999904656,
+    "apply_seconds": 0.0014429999991989462,
+    "scores": {
+      "pairs": 1024,
+      "relative_l2": 2.080602412488805e-15,
+      "max_abs": 5.551115123125783e-14
+    }
+  },
+  "reference_file": "runs\\reference.pt"
+}
